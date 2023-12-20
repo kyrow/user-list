@@ -1,4 +1,4 @@
-interface ISingleUser {
+export interface ISingleUser {
 	key: React.Key;
 	_id: number;
 	firstName: string;
@@ -9,4 +9,7 @@ interface ISingleUser {
 
 export interface IUserList {
 	users: ISingleUser[]
+	defaultUsersList: ISingleUser[]
+	selectedPage: number
 }
+

@@ -1,18 +1,18 @@
-import { Button, Flex, Table } from "antd"
-import { fieldsTitle } from "../../features/fieldsControl"
+import { Flex, Table, TablePaginationConfig } from "antd"
+import { fieldsTitle } from "../../features/fieldsTitle"
 import { useEffect, useState } from "react"
 import { getUserList } from "../../shared/store/slices/getUserList"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../../shared/store/store"
-import Search from "antd/es/input/Search"
-import { searchUser } from "../../shared/store/slices/usersList-slice"
+import FieldsControl from "../../features/fieldsControl"
+import { changePage } from "../../shared/store/slices/usersList-slice"
 
 
 function UserListWidget() {
 
 	const dispatch = useDispatch<AppDispatch>()
-	const { users } = useSelector((state: RootState) => state.userListReducer);
-	const [isSearchMode, setSearchMode] = useState(false)
+	const { users, selectedPage } = useSelector((state: RootState) => state);
+
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -24,35 +24,48 @@ function UserListWidget() {
 		fetchData();
 	}, [dispatch]);
 
+	const changeCurrentPage = (pagination: TablePaginationConfig) => {
+		dispatch(changePage(pagination.current));
+	};
+
+
 	return (
-		<div style={{ height: '100vh', position: 'relative' }}>
-			<Flex style={{ position: 'absolute', top: 16, left: 0, width: 300, zIndex: 5 }} gap='small'>
-				<Search
-					placeholder="find a user"
-					onSearch={(value: string) => {
-						setLoading(true);
-						dispatch(searchUser(value.toLowerCase()))
-						setLoading(false);
-						setSearchMode(true)
-					}}
-					enterButton
-				/>
-				{isSearchMode && <Button onClick={() => {
-					setLoading(true);
-					dispatch(getUserList())
-					setLoading(false);
-					setSearchMode(false)
-				}}>Reset</Button>}
-			</Flex>
+		<Flex style={{ height: '100%', position: 'relative' }} >
+
+			<FieldsControl
+				loaderOn={() => setLoading(true)}
+				loaderOff={() => setLoading(false)}
+			/>
 
 			<Table
 				columns={fieldsTitle}
 				dataSource={users}
-				pagination={{ pageSize: 50, position: ['topRight'] }}
+				pagination={{
+					defaultPageSize: 50,
+					showSizeChanger: false,
+					position: ['topRight'],
+					current: selectedPage,
+					hideOnSinglePage: false,
+					total: 100,
+				}}
+				onChange={changeCurrentPage}
 				loading={loading}
 				scroll={{ y: "80vh" }}
+				expandable={{
+					expandedRowRender: (record) =>
+						<Flex
+							gap='small'
+							vertical
+						>
+							<p style={{ margin: 0 }}>{record.firstName},</p>
+							<p style={{ margin: 0 }}>{record.lastName},</p>
+							<p style={{ margin: 0 }}>{record.email},</p>
+							<p style={{ margin: 0 }}>{record.phone}</p>
+						</Flex>
+					,
+				}}
 			/>
-		</div>
+		</Flex>
 	)
 }
 
