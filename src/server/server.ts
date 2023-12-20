@@ -8,6 +8,7 @@ createServer({
 		this.namespace = "api"
 		this.get("/users", () => {
 			return data
-		})
+		}
+		)
 	},
 })
